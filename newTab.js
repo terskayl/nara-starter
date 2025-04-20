@@ -618,6 +618,25 @@ document.addEventListener("DOMContentLoaded", () => {
       return a.completed ? -1 : 1;
     });
   }
+  const encouragementMessages = [
+    "Great job!",
+    "Keep it up!",
+    "You're doing amazing!",
+    "One step at a time!",
+    "Proud of you!",
+    "Look at you go!"
+  ];
+  
+  function showSpeechBubble() {
+    const bubble = document.getElementById("speech-bubble");
+    const randomMsg = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+    bubble.textContent = randomMsg;
+    bubble.classList.add("show");
+  
+    setTimeout(() => {
+      bubble.classList.remove("show");
+    }, 3000); // bubble disappears after 2.5 seconds
+  }
 
   function renderTasks(tasks, backgroundIndex, category) {
     const tasksHeader =
@@ -669,9 +688,11 @@ document.addEventListener("DOMContentLoaded", () => {
       checkbox.addEventListener("change", () => {
         const originalIndex = tasks.indexOf(task);
         tasks[originalIndex].completed = checkbox.checked;
+      
 
         if (tasks[originalIndex].completed) {
           const deleteButton = taskItem.querySelector(".delete-task");
+          showSpeechBubble();
           if (deleteButton) deleteButton.remove();
         }
 
@@ -745,7 +766,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }, 600);
         }
       });
-
+      
+      
       const taskTextInput = taskItem.querySelector(".task-text");
       taskTextInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
@@ -950,3 +972,5 @@ document.addEventListener("DOMContentLoaded", () => {
     tasksContainer.classList.remove("hidden");
   }
 });
+console.log("Found speech bubble:", document.getElementById("speech-bubble"));
+
