@@ -576,3 +576,54 @@ input[type="checkbox"]:checked+.task-text {
     opacity: 0.95;
     animation: welcomeFadeIn 1s ease-out forwards;
     }
+      #speech-bubble {
+        position: absolute;
+        bottom: 180px;
+        right: 100px;
+        background-color: #fff9c4;
+        border: 2px solid #fbc02d;
+        border-radius: 30px;
+        padding: 16px 20px;
+        font-size: 15px;
+        color: #333;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        box-shadow: 6px 8px 16px rgba(0, 0, 0, 0.1);
+        max-width: 240px;
+        pointer-events: none;
+        font-family: "Poppins", sans-serif;
+        line-height: 1.4;
+      }
+      
+      #speech-bubble.show {
+        opacity: 1;
+        animation: bubble-pop 0.3s ease-out;
+      }
+      #quote-overlay {
+        position: fixed;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: transparent;
+        color: rgba(0, 0, 0, 0.5); 
+        font-size: 16px;
+        font-style: italic;
+        font-family: 'Georgia', serif;
+        max-width: 80%;
+        text-align: center;
+        z-index: 999;
+        pointer-events: none; 
+        opacity: 0;
+        animation: fadeIn 2s ease-in forwards;
+      }
+      
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+      
+      
+      
+      
