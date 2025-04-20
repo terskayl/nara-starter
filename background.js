@@ -12,8 +12,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "dailyReset") {
 
     chrome.storage.local.get("state", (data) => {
-      if (data.state && data.state.weeklyTasks && data.state.moods) {
-        chrome.storage.local.set({ state: {moods : data.state.moods, weeklyTasks: data.state.weeklyTasks}}, () => {
+      if (data.state && data.state.weeklyTasks) {
+        chrome.storage.local.set({ state: {weeklyTasks: data.state.weeklyTasks}}, () => {
           console.log("State reset at 12:00 a.m.");
         });
       } else {

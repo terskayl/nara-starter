@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tasksContainer = document.getElementById("tasks-container");
   const taskList = document.getElementById("task-list");
   const weeklyTasksContainer = document.getElementById("weekly-tasks-container");
+  const moodContainer = document.getElementById("mood-tracker-container");
   const resetButton = document.getElementById("reset-button");
   const resetModal = document.getElementById("reset-modal");
   const resetYesButton = document.getElementById("reset-yes");
@@ -384,7 +385,6 @@ document.addEventListener("DOMContentLoaded", () => {
   chrome.storage.local.get("state", (data) => {
     if (data.state && data.state.tasks) {
       const {
-        moods,
         weeklyTasks,
         tasks,
         backgroundIndex,
@@ -402,6 +402,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ).then(() => {
           tasksContainer.classList.add("hidden");
           weeklyTasksContainer.classList.add("hidden");
+          moodContainer.classList.add("hidden");
           categoriesContainer.classList.add("hidden");
           hideHoverCircles(); // Hide hover circles when the final image is shown
           document.getElementById("welcome-message").classList.add("hidden");
@@ -429,6 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
       //categoriesContainer.classList.remove("hidden");
       tasksContainer.classList.add("hidden");
       weeklyTasksContainer.classList.add("hidden");
+      moodContainer.classList.add("hidden");
       document.getElementById("welcome-message").classList.remove("hidden");
       showHoverCircles(); // Show hover circles in the initial state
       changeBackgroundWithSlide(initialBackground);
@@ -459,10 +461,9 @@ document.addEventListener("DOMContentLoaded", () => {
               completed: false,
             }));
           }
-
+        
         chrome.storage.local.set({
           state: {
-            moods: [],
             weeklyTasks,
             tasks,
             backgroundIndex: 0,
@@ -489,7 +490,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
         chrome.storage.local.set({
           state: {
-            moods: [],
             weeklyTasks,
             tasks,
             backgroundIndex: 0,
@@ -511,6 +511,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // I DON'T THINK THIS IS EVER RUN?
   chrome.runtime.onMessage.addListener((message) => {
     if (message.action === "updateSubtasks") {
       const tasks = message.subtasks.map((task) => ({
@@ -519,7 +520,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }));
       chrome.storage.local.set({
         state: {
-          moods: [],
           weeklyTasks: {},
           tasks,
           backgroundIndex: 0,
@@ -553,6 +553,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Reset the UI to the initial state
     tasksContainer.classList.add("hidden");
     weeklyTasksContainer.classList.add("hidden");
+    moodContainer.classList.add("hidden");
     document.getElementById("welcome-message").classList.remove("hidden");
     changeBackgroundWithSlide(initialBackground);
 
@@ -747,6 +748,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ).then(() => {
             tasksContainer.classList.add("hidden");
             weeklyTasksContainer.classList.add("hidden");
+            moodContainer.classList.add("hidden");
             categoriesContainer.classList.add("hidden");
             hideHoverCircles(); // Hide hover circles when the final image is shown
             document.getElementById("welcome-message").classList.add("hidden");
@@ -765,7 +767,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chrome.storage.local.set({
           state: {
-            moods: [],
             weeklyTasks,
             tasks,
             backgroundIndex: newBackgroundIndex,
@@ -840,6 +841,7 @@ document.addEventListener("DOMContentLoaded", () => {
               ).then(() => {
                 tasksContainer.classList.add("hidden");
                 weeklyTasksContainer.classList.add("hidden");
+                moodContainer.classList.add("hidden");
                 categoriesContainer.classList.add("hidden");
                 document
                   .getElementById("welcome-message")
@@ -859,7 +861,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             chrome.storage.local.set({
               state: {
-                moods: [],
                 weeklyTasks,
                 tasks,
                 backgroundIndex: newBackgroundIndex,
@@ -876,7 +877,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chrome.storage.local.set({
           state: {
-            moods: [],
             weeklyTasks,
             tasks,
             backgroundIndex,
@@ -907,6 +907,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ).then(() => {
               tasksContainer.classList.add("hidden");
               weeklyTasksContainer.classList.add("hidden");
+              moodContainer.classList.add("hidden");
               categoriesContainer.classList.add("hidden");
               document
                 .getElementById("welcome-message")
@@ -926,7 +927,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
           chrome.storage.local.set({
             state: {
-              moods: [],
               weeklyTasks,
               tasks,
               backgroundIndex: newBackgroundIndex,
@@ -988,6 +988,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ).then(() => {
             tasksContainer.classList.add("hidden");
             weeklyTasksContainer.classList.add("hidden");
+            moodContainer.classList.add("hidden");
             categoriesContainer.classList.add("hidden");
             document.getElementById("welcome-message").classList.add("hidden");
             // Create and show thank you message
@@ -1016,6 +1017,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     tasksContainer.classList.remove("hidden");
+    moodContainer.classList.remove("hidden");
   }
 
   // RENDER TASKS
@@ -1100,6 +1102,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ).then(() => {
             tasksContainer.classList.add("hidden");
             weeklyTasksContainer.classList.add("hidden");
+            moodContainer.classList.add("hidden");
             categoriesContainer.classList.add("hidden");
             hideHoverCircles(); // Hide hover circles when the final image is shown
             document.getElementById("welcome-message").classList.add("hidden");
@@ -1118,7 +1121,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chrome.storage.local.set({
           state: {
-            moods: [],
             weeklyTasks,
             tasks,
             backgroundIndex: newBackgroundIndex,
@@ -1193,6 +1195,7 @@ document.addEventListener("DOMContentLoaded", () => {
               ).then(() => {
                 tasksContainer.classList.add("hidden");
                 weeklyTasksContainer.classList.add("hidden");
+                moodContainer.classList.add("hidden");
                 categoriesContainer.classList.add("hidden");
                 document
                   .getElementById("welcome-message")
@@ -1212,7 +1215,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             chrome.storage.local.set({
               state: {
-                moods: [],
                 weeklyTasks,
                 tasks,
                 backgroundIndex: newBackgroundIndex,
@@ -1229,7 +1231,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chrome.storage.local.set({
           state: {
-            moods: [],
             weeklyTasks,
             tasks,
             backgroundIndex,
@@ -1260,6 +1261,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ).then(() => {
               tasksContainer.classList.add("hidden");
               weeklyTasksContainer.classList.add("hidden");
+              moodContainer.classList.add("hidden");
               categoriesContainer.classList.add("hidden");
               document
                 .getElementById("welcome-message")
@@ -1279,7 +1281,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
           chrome.storage.local.set({
             state: {
-              moods: [],
               weeklyTasks,
               tasks,
               backgroundIndex: newBackgroundIndex,
@@ -1341,6 +1342,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ).then(() => {
             tasksContainer.classList.add("hidden");
             weeklyTasksContainer.classList.add("hidden");
+            moodContainer.classList.add("hidden");
             categoriesContainer.classList.add("hidden");
             document.getElementById("welcome-message").classList.add("hidden");
             // Create and show thank you message
@@ -1358,7 +1360,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chrome.storage.local.set({
           state: {
-            moods: [],
             weeklyTasks,
             tasks,
             backgroundIndex: newBackgroundIndex,
@@ -1371,5 +1372,77 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     weeklyTasksContainer.classList.remove("hidden");
+    moodContainer.classList.remove("hidden");
   }
+
+  function getDaysInMonth(year, month) {
+    return new Date(year, month + 1, 0).getDate();
+  }
+  
+  function renderCalendar(moods) {
+    const calendar = document.getElementById("mood-calendar");
+    calendar.innerHTML = "";
+  
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const daysInMonth = getDaysInMonth(year, month);
+  
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const emoji = moods[dateKey] || "⬜"; // default placeholder emoji
+  
+      const dayDiv = document.createElement("div");
+      dayDiv.className = "day";
+      dayDiv.textContent = emoji;
+  
+      calendar.appendChild(dayDiv);
+    }
+  }
+  
+  chrome.storage.local.get("moods", (result) => {
+    const moods = result.moods || {};
+    renderCalendar(moods);
+  });
+
+
+  function getTodayKey() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  }
+  
+  function updateMoodForToday(emoji) {
+    chrome.storage.local.get("moods", (result) => {
+      const moods = result.moods || {};
+      const todayKey = getTodayKey();
+  
+      if (emoji) {
+        moods[todayKey] = emoji;
+      } else {
+        delete moods[todayKey];
+      }
+  
+      chrome.storage.local.set({ moods }, () => {
+        renderCalendar(moods);
+      });
+    });
+  }
+  
+  document.querySelectorAll(".emoji-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const emoji = btn.textContent;
+      updateMoodForToday(emoji);
+    });
+  });
+  
+  document.getElementById("reset-btn").addEventListener("click", () => {
+    updateMoodForToday(null);
+  });
+  
+  chrome.storage.local.get("moods", (result) => {
+    const moods = result.moods || {};
+    renderCalendar(moods);
+  });
+  
+  
 });
