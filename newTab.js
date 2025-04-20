@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const categoriesContainer = document.getElementById("categories-container");
   const tasksContainer = document.getElementById("tasks-container");
   const taskList = document.getElementById("task-list");
+  const weeklyTasksContainer = document.getElementById("weekly-tasks-container");
   const resetButton = document.getElementById("reset-button");
   const resetModal = document.getElementById("reset-modal");
   const resetYesButton = document.getElementById("reset-yes");
@@ -349,6 +350,16 @@ document.addEventListener("DOMContentLoaded", () => {
       "Do one creative activity",
       "Practice Duolingo for 10 minutes",
     ],
+    weekly: [
+      "Go grocery shopping for the week",
+      "Plan meals for the week",
+      "Do laundry and fold clothes",
+      "Clean out your fridge",
+      "Organize your closet",
+      "Plan a fun outing with friends or family",
+      "Spend time on a hobby you love",
+      "Reflect on your week and set goals for next week",
+    ]
   };
 
   // Function to get 5 random tasks from a category
@@ -363,14 +374,18 @@ document.addEventListener("DOMContentLoaded", () => {
     pet: getRandomTasks("pet"),
     friends: getRandomTasks("friends"),
     mind: getRandomTasks("mind"),
+    weekly: getRandomTasks("weekly"),
   };
 
   let sortableInstance = null;
 
+  // WHOLE SEQUENCE STARTING FROM GET STATE
   // Load saved state from chrome.storage.local
   chrome.storage.local.get("state", (data) => {
-    if (data.state) {
+    if (data.state && data.state.tasks) {
       const {
+        moods,
+        weeklyTasks,
         tasks,
         backgroundIndex,
         categoriesHidden,
@@ -378,6 +393,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedCategory,
       } = data.state;
 
+      // HIDES EVERYTHING EXCEPT FOR THE BACKGROUND
       if (isFinalImage) {
         changeBackgroundWithSlide(
           backgroundSets[selectedCategory][
@@ -385,6 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ]
         ).then(() => {
           tasksContainer.classList.add("hidden");
+          weeklyTasksContainer.classList.add("hidden");
           categoriesContainer.classList.add("hidden");
           hideHoverCircles(); // Hide hover circles when the final image is shown
           document.getElementById("welcome-message").classList.add("hidden");
@@ -395,8 +412,10 @@ document.addEventListener("DOMContentLoaded", () => {
           thankYouMessage.textContent = "Thank you for taking good care of me";
           document.body.appendChild(thankYouMessage);
         });
-      } else {
-        renderTasks(tasks, backgroundIndex, selectedCategory);
+      } else { //RENDER TASKS
+        renderTasks(tasks, weeklyTasks, backgroundIndex, selectedCategory);
+        console.log(tasks);
+        renderWeeklyTasks(tasks, weeklyTasks, backgroundIndex, selectedCategory);
         if (categoriesHidden) {
           categoriesContainer.classList.add("hidden");
           hideHoverCircles(); // Hide hover circles when categories are hidden
@@ -406,14 +425,17 @@ document.addEventListener("DOMContentLoaded", () => {
           backgroundSets[selectedCategory][backgroundIndex]
         );
       }
-    } else {
+    } else { // IF NO STATE, SHOW INITIAL SCREEN
       //categoriesContainer.classList.remove("hidden");
+      tasksContainer.classList.add("hidden");
+      weeklyTasksContainer.classList.add("hidden");
       document.getElementById("welcome-message").classList.remove("hidden");
       showHoverCircles(); // Show hover circles in the initial state
       changeBackgroundWithSlide(initialBackground);
     }
   });
 
+  // LINK TO CATEGORIES
   categoriesContainer.addEventListener("click", (event) => {
     if (event.target.classList.contains("category-button")) {
       const category = event.target.dataset.category;
@@ -428,8 +450,20 @@ document.addEventListener("DOMContentLoaded", () => {
             completed: false,
           }));
 
+          const weeklyTasks = data.weeklyTasks
+          if (!weeklyTasks) {
+            weeklyTasks = Array(5)
+            .fill()
+            .map(() => ({
+              text: "",
+              completed: false,
+            }));
+          }
+
         chrome.storage.local.set({
           state: {
+            moods: [],
+            weeklyTasks,
             tasks,
             backgroundIndex: 0,
             categoriesHidden: true,
@@ -441,15 +475,22 @@ document.addEventListener("DOMContentLoaded", () => {
         // Set the background to the category's origin photo (e.g., A.jpg)
         changeBackgroundWithSlide(backgroundSets[category][0]).then(() => {
           // Render the empty tasks
-          renderTasks(tasks, 0, category);
+          renderTasks(tasks, weeklyTasks, 0, category);
+          renderWeeklyTasks(tasks, weeklyTasks, 0, category);
         });
       } else {
         const tasks = hardcodedTasks[category].map((task) => ({
           text: task,
           completed: false,
         }));
+        const weeklyTasks = hardcodedTasks["weekly"].map((wtask) => ({
+          text: wtask,
+          completed: false,
+        }));
         chrome.storage.local.set({
           state: {
+            moods: [],
+            weeklyTasks,
             tasks,
             backgroundIndex: 0,
             categoriesHidden: true,
@@ -459,7 +500,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         // Set the background to the category's origin photo (e.g., A.jpg)
         changeBackgroundWithSlide(backgroundSets[category][0]).then(() => {
-          renderTasks(tasks, 0, category);
+          renderTasks(tasks, weeklyTasks, 0, category);
+          renderWeeklyTasks(tasks, weeklyTasks, 0, category);
         });
       }
 
@@ -477,6 +519,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }));
       chrome.storage.local.set({
         state: {
+          moods: [],
+          weeklyTasks: {},
           tasks,
           backgroundIndex: 0,
           categoriesHidden: true,
@@ -484,7 +528,8 @@ document.addEventListener("DOMContentLoaded", () => {
           selectedCategory: "others",
         },
       });
-      renderTasks(tasks, 0, "self");
+      renderTasks(tasks, {}, 0, "self");
+      renderWeeklyTasks(tasks, {}, 0, "self");
     }
   });
 
@@ -507,6 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Reset the UI to the initial state
     tasksContainer.classList.add("hidden");
+    weeklyTasksContainer.classList.add("hidden");
     document.getElementById("welcome-message").classList.remove("hidden");
     changeBackgroundWithSlide(initialBackground);
 
@@ -661,7 +707,8 @@ document.addEventListener("DOMContentLoaded", () => {
   overlay.textContent = quote;
 
 
-  function renderTasks(tasks, backgroundIndex, category) {
+  // RENDER TASKS
+  function renderTasks(tasks, weeklyTasks, backgroundIndex, category) {
     const tasksHeader =
       document.getElementById("tasks-header") || document.createElement("div");
     tasksHeader.id = "tasks-header";
@@ -670,6 +717,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <p class="task-subtitle">some tasks to help you feel good</p>
     `;
 
+    // MAKE ELEMENT IF NOT EXISTING
     if (!document.getElementById("tasks-header")) {
       tasksContainer.innerHTML = "";
       tasksContainer.appendChild(tasksHeader);
@@ -684,6 +732,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const sortedTasks = sortTasksByCompletion(tasks);
 
+    // ADD TASKS
     sortedTasks.forEach((task, index) => {
       const taskItem = document.createElement("li");
       taskItem.classList.add("draggable");
@@ -706,7 +755,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       taskItem.draggable = true;
       taskItem.dataset.index = tasks.indexOf(task);
-
+      
+      // CHECKBOX EVENT LISTENER
       const checkbox = taskItem.querySelector("input[type='checkbox']");
       checkbox.addEventListener("change", () => {
         const originalIndex = tasks.indexOf(task);
@@ -734,11 +784,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const { backgroundIndex: newBackgroundIndex, isFinalImage } =
           updateBackgroundState(tasks, category);
 
+        // DISPLAYS FINAL IMAGE AGAIN ON CHECKING ALL
         if (isFinalImage) {
           changeBackgroundWithSlide(
             backgroundSets[category][backgroundSets[category].length - 1]
           ).then(() => {
             tasksContainer.classList.add("hidden");
+            weeklyTasksContainer.classList.add("hidden");
             categoriesContainer.classList.add("hidden");
             hideHoverCircles(); // Hide hover circles when the final image is shown
             document.getElementById("welcome-message").classList.add("hidden");
@@ -757,6 +809,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chrome.storage.local.set({
           state: {
+            moods: [],
+            weeklyTasks,
             tasks,
             backgroundIndex: newBackgroundIndex,
             categoriesHidden: true,
@@ -764,7 +818,7 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedCategory: category,
           },
         });
-
+        // IDK PROB NOT IMPORTANT
         if (sortableInstance) {
           const taskItems = Array.from(taskListElement.children);
           const oldItemEl = taskItems[originalIndex];
@@ -789,8 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }, 600);
         }
       });
-      
-      
+      // SELECT TEXT
       const taskTextInput = taskItem.querySelector(".task-text");
       taskTextInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
@@ -799,6 +852,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
+      // EDIT TEXT CONTINUED
       taskTextInput.addEventListener("input", () => {
         const originalIndex = tasks.indexOf(task);
         tasks[originalIndex].text = taskTextInput.textContent;
@@ -828,6 +882,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 backgroundSets[category][backgroundSets[category].length - 1]
               ).then(() => {
                 tasksContainer.classList.add("hidden");
+                weeklyTasksContainer.classList.add("hidden");
                 categoriesContainer.classList.add("hidden");
                 document
                   .getElementById("welcome-message")
@@ -847,6 +902,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             chrome.storage.local.set({
               state: {
+                moods: [],
+                weeklyTasks,
                 tasks,
                 backgroundIndex: newBackgroundIndex,
                 categoriesHidden: true,
@@ -855,13 +912,15 @@ document.addEventListener("DOMContentLoaded", () => {
               },
             });
 
-            renderTasks(tasks, backgroundIndex, category);
+            renderTasks(tasks, weeklyTasks, backgroundIndex, category);
           });
           taskItem.appendChild(deleteButton);
         }
 
         chrome.storage.local.set({
           state: {
+            moods: [],
+            weeklyTasks,
             tasks,
             backgroundIndex,
             categoriesHidden: true,
@@ -871,6 +930,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
+      // DELETE TASKS
       const deleteButton = taskItem.querySelector(".delete-task");
       if (deleteButton) {
         deleteButton.addEventListener("click", () => {
@@ -889,6 +949,7 @@ document.addEventListener("DOMContentLoaded", () => {
               backgroundSets[category][backgroundSets[category].length - 1]
             ).then(() => {
               tasksContainer.classList.add("hidden");
+              weeklyTasksContainer.classList.add("hidden");
               categoriesContainer.classList.add("hidden");
               document
                 .getElementById("welcome-message")
@@ -908,6 +969,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
           chrome.storage.local.set({
             state: {
+              moods: [],
+              weeklyTasks,
               tasks,
               backgroundIndex: newBackgroundIndex,
               categoriesHidden: true,
@@ -916,12 +979,13 @@ document.addEventListener("DOMContentLoaded", () => {
             },
           });
 
-          renderTasks(tasks, newBackgroundIndex, category);
+          renderTasks(tasks, weeklyTasks, newBackgroundIndex, category);
         });
       }
 
       taskListElement.appendChild(taskItem);
 
+      // ANIMATE TASK
       if (!document.querySelector("#task-animations")) {
         const style = document.createElement("style");
         style.id = "task-animations";
@@ -947,6 +1011,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sortableInstance.destroy();
     }
 
+    // PROBABLY NOT IMPORTANT
     sortableInstance = new Sortable(taskListElement, {
       animation: 600,
       easing: "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -965,6 +1030,7 @@ document.addEventListener("DOMContentLoaded", () => {
             backgroundSets[category][backgroundSets[category].length - 1]
           ).then(() => {
             tasksContainer.classList.add("hidden");
+            weeklyTasksContainer.classList.add("hidden");
             categoriesContainer.classList.add("hidden");
             document.getElementById("welcome-message").classList.add("hidden");
             // Create and show thank you message
@@ -993,6 +1059,361 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     tasksContainer.classList.remove("hidden");
+  }
+
+  // RENDER TASKS
+  function renderWeeklyTasks(tasks, weeklyTasks, backgroundIndex, category) {
+    const weeklyTasksHeader =
+      document.getElementById("weekly-tasks-header") || document.createElement("div");
+      weeklyTasksHeader.id = "weekly-tasks-header";
+      weeklyTasksHeader.innerHTML = `
+      <h1 class="task-title">weekly list</h1>
+      <p class="task-subtitle">longer goals lasting this week</p>
+    `;
+
+    // MAKE ELEMENT IF NOT EXISTING
+    if (!document.getElementById("weekly-tasks-header")) {
+      weeklyTasksContainer.innerHTML = "";
+      weeklyTasksContainer.appendChild(weeklyTasksHeader);
+
+      const newTaskList = document.createElement("ul");
+      newTaskList.id = "weekly-task-list";
+      weeklyTasksContainer.appendChild(newTaskList);
+    }
+
+    const taskListElement = document.getElementById("weekly-task-list");
+    taskListElement.innerHTML = "";
+
+    const sortedTasks = sortTasksByCompletion(weeklyTasks);
+
+    // ADD TASKS
+    sortedTasks.forEach((task, index) => {
+      const taskItem = document.createElement("li");
+      taskItem.classList.add("draggable");
+      taskItem.innerHTML = `
+        <input type="checkbox" ${task.completed ? "checked" : ""} />
+        <div class="task-text" contenteditable="true" placeholder="New task">${
+          task.text
+        }</div>
+        ${
+          task.text && !task.completed
+            ? `<button class="delete-task"></button>`
+            : ""
+        }
+        <div class="drag-handle">
+         <div class="line"></div>
+          <div class="line"></div>
+          <div class="line"></div>
+        </div>
+      `;
+
+      taskItem.draggable = true;
+      taskItem.dataset.index = weeklyTasks.indexOf(task);
+      
+      // CHECKBOX EVENT LISTENER
+      const checkbox = taskItem.querySelector("input[type='checkbox']");
+      checkbox.addEventListener("change", () => {
+        const originalIndex = weeklyTasks.indexOf(task);
+        weeklyTasks[originalIndex].completed = checkbox.checked;
+
+        if (weeklyTasks[originalIndex].completed) {
+          const deleteButton = taskItem.querySelector(".delete-task");
+          if (deleteButton) deleteButton.remove();
+        }
+
+        let newPosition = 0;
+        if (checkbox.checked) {
+          newPosition = weeklyTasks.filter(
+            (t, i) => t.completed && i < originalIndex
+          ).length;
+        } else {
+          newPosition = weeklyTasks.filter((t) => t.completed).length;
+        }
+
+        const [movedTask] = weeklyTasks.splice(originalIndex, 1);
+        weeklyTasks.splice(newPosition, 0, movedTask);
+
+        const { backgroundIndex: newBackgroundIndex, isFinalImage } =
+          updateBackgroundState(weeklyTasks, category);
+
+        // DISPLAYS FINAL IMAGE AGAIN ON CHECKING ALL
+        if (isFinalImage) {
+          changeBackgroundWithSlide(
+            backgroundSets[category][backgroundSets[category].length - 1]
+          ).then(() => {
+            tasksContainer.classList.add("hidden");
+            weeklyTasksContainer.classList.add("hidden");
+            categoriesContainer.classList.add("hidden");
+            hideHoverCircles(); // Hide hover circles when the final image is shown
+            document.getElementById("welcome-message").classList.add("hidden");
+            // Create and show thank you message
+            const thankYouMessage = document.createElement("div");
+            thankYouMessage.className = "thank-you-message";
+            thankYouMessage.textContent =
+              "Thank you for taking good care of me";
+            document.body.appendChild(thankYouMessage);
+          });
+        } else {
+          changeBackgroundWithSlide(
+            backgroundSets[category][newBackgroundIndex]
+          );
+        }
+
+        chrome.storage.local.set({
+          state: {
+            moods: [],
+            weeklyTasks,
+            tasks,
+            backgroundIndex: newBackgroundIndex,
+            categoriesHidden: true,
+            isFinalImage,
+            selectedCategory: category,
+          },
+        });
+        // IDK PROB NOT IMPORTANT
+        if (sortableInstance) {
+          const taskItems = Array.from(taskListElement.children);
+          const oldItemEl = taskItems[originalIndex];
+
+          taskListElement.removeChild(oldItemEl);
+          taskListElement.insertBefore(
+            oldItemEl,
+            taskListElement.children[newPosition]
+          );
+
+          sortableInstance.option("animation", 600);
+          sortableInstance.option("onEnd", null);
+          const evt = new CustomEvent("sortable:start");
+          taskListElement.dispatchEvent(evt);
+
+          oldItemEl.style.transition = "all 600ms ease";
+          oldItemEl.style.animation = "moveTask 600ms ease";
+
+          setTimeout(() => {
+            oldItemEl.style.transition = "";
+            oldItemEl.style.animation = "";
+          }, 600);
+        }
+      });
+
+      // SELECT TEXT
+      const taskTextInput = taskItem.querySelector(".task-text");
+      taskTextInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault(); // Prevent the default behavior (new line)
+          taskTextInput.blur(); // Exit edit mode
+        }
+      });
+
+      // EDIT TEXT CONTINUED
+      taskTextInput.addEventListener("input", () => {
+        const originalIndex = weeklyTasks.indexOf(task);
+        weeklyTasks[originalIndex].text = taskTextInput.textContent;
+
+        const existingDeleteButton = taskItem.querySelector(".delete-task");
+
+        if (
+          weeklyTasks[originalIndex].text.trim() !== "" &&
+          !weeklyTasks[originalIndex].completed &&
+          !existingDeleteButton
+        ) {
+          const deleteButton = document.createElement("button");
+          deleteButton.className = "delete-task";
+
+          deleteButton.addEventListener("click", () => {
+            weeklyTasks.splice(originalIndex, 1);
+
+            if (weeklyTasks.length < 5) {
+              weeklyTasks.push({ text: "", completed: false });
+            }
+
+            const { backgroundIndex: newBackgroundIndex, isFinalImage } =
+              updateBackgroundState(weeklyTasks, category);
+
+            if (isFinalImage) {
+              changeBackgroundWithSlide(
+                backgroundSets[category][backgroundSets[category].length - 1]
+              ).then(() => {
+                tasksContainer.classList.add("hidden");
+                weeklyTasksContainer.classList.add("hidden");
+                categoriesContainer.classList.add("hidden");
+                document
+                  .getElementById("welcome-message")
+                  .classList.add("hidden");
+                // Create and show thank you message
+                const thankYouMessage = document.createElement("div");
+                thankYouMessage.className = "thank-you-message";
+                thankYouMessage.textContent =
+                  "Thank you for taking good care of me";
+                document.body.appendChild(thankYouMessage);
+              });
+            } else {
+              changeBackgroundWithSlide(
+                backgroundSets[category][newBackgroundIndex]
+              );
+            }
+
+            chrome.storage.local.set({
+              state: {
+                moods: [],
+                weeklyTasks,
+                tasks,
+                backgroundIndex: newBackgroundIndex,
+                categoriesHidden: true,
+                isFinalImage,
+                selectedCategory: category,
+              },
+            });
+
+            renderWeeklyTasks(tasks, weeklyTasks, backgroundIndex, category);
+          });
+          taskItem.appendChild(deleteButton);
+        }
+
+        chrome.storage.local.set({
+          state: {
+            moods: [],
+            weeklyTasks,
+            tasks,
+            backgroundIndex,
+            categoriesHidden: true,
+            isFinalImage: false,
+            selectedCategory: category,
+          },
+        });
+      });
+
+      // DELETE TASKS
+      const deleteButton = taskItem.querySelector(".delete-task");
+      if (deleteButton) {
+        deleteButton.addEventListener("click", () => {
+          const originalIndex = weeklyTasks.indexOf(task);
+          weeklyTasks.splice(originalIndex, 1);
+
+          if (weeklyTasks.length < 5) {
+            weeklyTasks.push({ text: "", completed: false });
+          }
+
+          const { backgroundIndex: newBackgroundIndex, isFinalImage } =
+            updateBackgroundState(weeklyTasks, category);
+
+          if (isFinalImage) {
+            changeBackgroundWithSlide(
+              backgroundSets[category][backgroundSets[category].length - 1]
+            ).then(() => {
+              tasksContainer.classList.add("hidden");
+              weeklyTasksContainer.classList.add("hidden");
+              categoriesContainer.classList.add("hidden");
+              document
+                .getElementById("welcome-message")
+                .classList.add("hidden");
+              // Create and show thank you message
+              const thankYouMessage = document.createElement("div");
+              thankYouMessage.className = "thank-you-message";
+              thankYouMessage.textContent =
+                "Thank you for taking good care of me";
+              document.body.appendChild(thankYouMessage);
+            });
+          } else {
+            changeBackgroundWithSlide(
+              backgroundSets[category][newBackgroundIndex]
+            );
+          }
+
+          chrome.storage.local.set({
+            state: {
+              moods: [],
+              weeklyTasks,
+              tasks,
+              backgroundIndex: newBackgroundIndex,
+              categoriesHidden: true,
+              isFinalImage,
+              selectedCategory: category,
+            },
+          });
+
+          renderWeeklyTasks(tasks, weeklyTasks, newBackgroundIndex, category);
+        });
+      }
+
+      taskListElement.appendChild(taskItem);
+
+      // ANIMATE TASK
+      if (!document.querySelector("#task-animations")) {
+        const style = document.createElement("style");
+        style.id = "task-animations";
+        style.textContent = `
+          @keyframes moveTask {
+            0% {
+              transform: translateY(0);
+            }
+            50% {
+              transform: translateY(-10px);
+            }
+            100% {
+              transform: translateY(0);
+            }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    });
+
+    // Initialize or update SortableJS
+    if (sortableInstance) {
+      sortableInstance.destroy();
+    }
+
+    // PROBABLY NOT IMPORTANT
+    sortableInstance = new Sortable(taskListElement, {
+      animation: 600,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+      ghostClass: "sortable-ghost",
+      chosenClass: "sortable-chosen",
+
+      onUpdate: (evt) => {
+        const [movedTask] = weeklyTasks.splice(evt.oldIndex, 1);
+        weeklyTasks.splice(evt.newIndex, 0, movedTask);
+
+        const { backgroundIndex: newBackgroundIndex, isFinalImage } =
+          updateBackgroundState(weeklyTasks, category);
+
+        if (isFinalImage) {
+          changeBackgroundWithSlide(
+            backgroundSets[category][backgroundSets[category].length - 1]
+          ).then(() => {
+            tasksContainer.classList.add("hidden");
+            weeklyTasksContainer.classList.add("hidden");
+            categoriesContainer.classList.add("hidden");
+            document.getElementById("welcome-message").classList.add("hidden");
+            // Create and show thank you message
+            const thankYouMessage = document.createElement("div");
+            thankYouMessage.className = "thank-you-message";
+            thankYouMessage.textContent =
+              "Thank you for taking good care of me";
+            document.body.appendChild(thankYouMessage);
+          });
+        } else {
+          changeBackgroundWithSlide(
+            backgroundSets[category][newBackgroundIndex]
+          );
+        }
+
+        chrome.storage.local.set({
+          state: {
+            moods: [],
+            weeklyTasks,
+            tasks,
+            backgroundIndex: newBackgroundIndex,
+            categoriesHidden: true,
+            isFinalImage,
+            selectedCategory: category,
+          },
+        });
+      },
+    });
+
+    weeklyTasksContainer.classList.remove("hidden");
   }
 });
 console.log("Found speech bubble:", document.getElementById("speech-bubble"));
