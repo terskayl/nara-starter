@@ -10,10 +10,19 @@ chrome.runtime.onStartup.addListener(() => {
 // Handle alarms for resetting state
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "dailyReset") {
-    chrome.storage.local.set({ state: null }, () => {
-      console.log("State reset at 12:00 a.m.");
+
+    chrome.storage.local.get("state", (data) => {
+      if (data.state && data.state.weeklyTasks) {
+        chrome.storage.local.set({ state: {weeklyTasks: data.state.weeklyTasks}}, () => {
+          console.log("State reset at 12:00 a.m.");
+        });
+      } else {
+        chrome.storage.local.set({ state: null }, () => {
+          console.log("State reset at 12:00 a.m.");
+        });
+      }
+      setMidnightAlarm(); // Reset the alarm for the next day
     });
-    setMidnightAlarm(); // Reset the alarm for the next day
   }
 });
 
