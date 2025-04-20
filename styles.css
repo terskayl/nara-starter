@@ -512,5 +512,30 @@ input[type="checkbox"]:checked+.task-text {
         opacity: 1;
         animation: bubble-pop 0.3s ease-out;
       }
+      #quote-overlay {
+        position: fixed;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: transparent;
+        color: rgba(0, 0, 0, 0.5); 
+        font-size: 16px;
+        font-style: italic;
+        font-family: 'Georgia', serif;
+        max-width: 80%;
+        text-align: center;
+        z-index: 999;
+        pointer-events: none; 
+        opacity: 0;
+        animation: fadeIn 2s ease-in forwards;
+      }
+      
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+      
+      
       
       

@@ -638,6 +638,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000); // bubble disappears after 2.5 seconds
   }
 
+// Function to show a random quote on loading
+  const quotes = [
+    "Today is a new beginning.",
+    "Rise up. Start fresh. See the bright opportunity in each new day.",
+    "Make today count.",
+    "What we do today is what matters most.",
+    "Hey there! Be kind. Do good. Smile.",
+    "Start the day with a grateful heart.",
+    "New day. New strength. New thoughts. ",
+    "You’ve got this.",
+    "Let your light shine today.",
+    "The sky is blue, it’s beautiful, and so are you.",
+    "Every day is a fresh start.",
+    "Keep moving forward.",
+    "You know your potential. Don’t let anyone tell you otherwise.",
+    "Small steps lead to big changes."
+  ];
+
+  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+  const overlay = document.getElementById("quote-overlay");
+  overlay.textContent = quote;
+
+
   function renderTasks(tasks, backgroundIndex, category) {
     const tasksHeader =
       document.getElementById("tasks-header") || document.createElement("div");
