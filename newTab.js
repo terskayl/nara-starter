@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const taskList = document.getElementById("task-list");
   const weeklyTasksContainer = document.getElementById("weekly-tasks-container");
   const moodContainer = document.getElementById("mood-tracker-container");
+
   const resetButton = document.getElementById("reset-button");
   const resetModal = document.getElementById("reset-modal");
   const resetYesButton = document.getElementById("reset-yes");
@@ -431,6 +432,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tasksContainer.classList.add("hidden");
       weeklyTasksContainer.classList.add("hidden");
       moodContainer.classList.add("hidden");
+
       document.getElementById("welcome-message").classList.remove("hidden");
       showHoverCircles(); // Show hover circles in the initial state
       changeBackgroundWithSlide(initialBackground);
