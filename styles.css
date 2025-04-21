@@ -575,7 +575,8 @@ input[type="checkbox"]:checked+.task-text {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     opacity: 0.95;
     animation: welcomeFadeIn 1s ease-out forwards;
-    }
+}
+
 #speech-bubble {
     position: absolute;
     bottom: 180px;
@@ -595,12 +596,12 @@ input[type="checkbox"]:checked+.task-text {
     font-family: "Poppins", sans-serif;
     line-height: 1.4;
 }
-      
+
 #speech-bubble.show {
     opacity: 1;
     animation: bubble-pop 0.3s ease-out;
-    }
-#quote-overlay {
+}
+
     position: fixed;
     bottom: 50px;
     left: 50%;
@@ -623,7 +624,8 @@ input[type="checkbox"]:checked+.task-text {
         opacity: 1;
     }
 }
-      
-      
-      
-      
+    
+    
+    
+    
+
