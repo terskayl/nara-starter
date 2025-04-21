@@ -614,12 +614,18 @@ document.addEventListener("DOMContentLoaded", () => {
     resetModal.classList.add("hidden");
   });
 
-  function updateBackgroundState(tasks, selectedCategory) {
+  function updateBackgroundState(tasks, weeklyTasks, selectedCategory) {
     const tasksWithContent = tasks.filter((task) => task.text.trim() !== "");
     const completedTasks = tasks.filter(
       (task) => task.completed && task.text.trim() !== ""
     ).length;
     const totalTasksWithContent = tasksWithContent.length;
+
+    const weeklyTasksWithContent = weeklyTasks.filter((weeklyTask) => weeklyTask.text.trim() !== "");
+    const completedWeeklyTasks = weeklyTasks.filter(
+      (weeklyTask) => weeklyTask.completed && weeklyTask.text.trim() !== ""
+    ).length;
+    const totalWeeklyTasksWithContent = weeklyTasksWithContent.length;
 
     let backgroundIndex;
     let isFinalImage = false;
@@ -634,7 +640,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // Only show final image when ALL tasks with content are completed
       if (
         completedTasks === totalTasksWithContent &&
-        totalTasksWithContent > 0
+        totalTasksWithContent > 0 && completedWeeklyTasks === totalWeeklyTasksWithContent &&
+        totalWeeklyTasksWithContent > 0
       ) {
         backgroundIndex = backgroundSets[selectedCategory].length - 1;
         isFinalImage = true;
@@ -643,14 +650,16 @@ document.addEventListener("DOMContentLoaded", () => {
       // Original logic for other categories
       if (
         completedTasks === totalTasksWithContent &&
-        totalTasksWithContent > 0
+        totalTasksWithContent > 0 && completedWeeklyTasks === totalWeeklyTasksWithContent &&
+        totalWeeklyTasksWithContent > 0
       ) {
         backgroundIndex = backgroundSets[selectedCategory].length - 1;
         isFinalImage = true;
       } else {
         backgroundIndex = Math.min(
           completedTasks,
-          backgroundSets[selectedCategory].length - 1
+          backgroundSets[selectedCategory].length - 1,
+          4
         );
       }
     }
@@ -782,7 +791,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tasks.splice(newPosition, 0, movedTask);
 
         const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-          updateBackgroundState(tasks, category);
+          updateBackgroundState(tasks, weeklyTasks, category);
 
         // DISPLAYS FINAL IMAGE AGAIN ON CHECKING ALL
         if (isFinalImage) {
@@ -875,7 +884,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-              updateBackgroundState(tasks, category);
+              updateBackgroundState(tasks, weeklyTasks, category);
 
             if (isFinalImage) {
               changeBackgroundWithSlide(
@@ -942,7 +951,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-            updateBackgroundState(tasks, category);
+            updateBackgroundState(tasks, weeklyTasks, category);
 
           if (isFinalImage) {
             changeBackgroundWithSlide(
@@ -1023,7 +1032,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tasks.splice(evt.newIndex, 0, movedTask);
 
         const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-          updateBackgroundState(tasks, category);
+          updateBackgroundState(tasks, weeklyTasks, category);
 
         if (isFinalImage) {
           changeBackgroundWithSlide(
@@ -1134,7 +1143,7 @@ document.addEventListener("DOMContentLoaded", () => {
         weeklyTasks.splice(newPosition, 0, movedTask);
 
         const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-          updateBackgroundState(weeklyTasks, category);
+          updateBackgroundState(weeklyTasks, tasks, category);
 
         // DISPLAYS FINAL IMAGE AGAIN ON CHECKING ALL
         if (isFinalImage) {
@@ -1228,7 +1237,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-              updateBackgroundState(weeklyTasks, category);
+              updateBackgroundState(weeklyTasks, task, category);
 
             if (isFinalImage) {
               changeBackgroundWithSlide(
@@ -1295,7 +1304,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-            updateBackgroundState(weeklyTasks, category);
+            updateBackgroundState(weeklyTasks, tasks, category);
 
           if (isFinalImage) {
             changeBackgroundWithSlide(
@@ -1376,7 +1385,7 @@ document.addEventListener("DOMContentLoaded", () => {
         weeklyTasks.splice(evt.newIndex, 0, movedTask);
 
         const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-          updateBackgroundState(weeklyTasks, category);
+          updateBackgroundState(weeklyTasks, tasks, category);
 
         if (isFinalImage) {
           changeBackgroundWithSlide(
