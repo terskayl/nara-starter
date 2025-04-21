@@ -684,7 +684,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
     setTimeout(() => {
       bubble.classList.remove("show");
-    }, 3000); // bubble disappears after 2.5 seconds
+    }, 2500); // bubble disappears after 2.5 seconds
   }
 
 // Function to show a random quote on loading
