@@ -1122,6 +1122,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (weeklyTasks[originalIndex].completed) {
           const deleteButton = taskItem.querySelector(".delete-task");
+          showSpeechBubble();
           if (deleteButton) deleteButton.remove();
         }
 
