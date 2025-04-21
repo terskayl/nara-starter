@@ -113,7 +113,7 @@ body {
 #tasks-container {
     position: fixed;
     top: 120px;
-    left: 220px;
+    left: 40px;
     background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -140,7 +140,7 @@ body {
 #weekly-tasks-container {
     position: fixed;
     top: 120px;
-    right: 220px;
+    right: 30%;
     background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -171,8 +171,8 @@ body {
 
   #mood-tracker-container {
     position: fixed;
-    bottom: 40px;
-    left: 50%;
+    top: 120px;
+    right: 3px;
     transform: translateX(-50%);
     
     background: rgba(255, 255, 255, 0.5);
