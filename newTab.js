@@ -382,7 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // WHOLE SEQUENCE STARTING FROM GET STATE
   // Load saved state from chrome.storage.local
   chrome.storage.local.get("state", (data) => {
-    if (data.state) {
+    if (data.state && data.state.tasks) {
       const {
         moods,
         weeklyTasks,
@@ -427,6 +427,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } else { // IF NO STATE, SHOW INITIAL SCREEN
       //categoriesContainer.classList.remove("hidden");
+      tasksContainer.classList.add("hidden");
+      weeklyTasksContainer.classList.add("hidden");
       document.getElementById("welcome-message").classList.remove("hidden");
       showHoverCircles(); // Show hover circles in the initial state
       changeBackgroundWithSlide(initialBackground);
@@ -448,12 +450,15 @@ document.addEventListener("DOMContentLoaded", () => {
             completed: false,
           }));
 
-          const weeklyTasks = Array(5)
-          .fill()
-          .map(() => ({
-            text: "",
-            completed: false,
-          }));
+          const weeklyTasks = data.weeklyTasks
+          if (!weeklyTasks) {
+            weeklyTasks = Array(5)
+            .fill()
+            .map(() => ({
+              text: "",
+              completed: false,
+            }));
+          }
 
         chrome.storage.local.set({
           state: {
@@ -547,6 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Reset the UI to the initial state
     tasksContainer.classList.add("hidden");
+    weeklyTasksContainer.classList.add("hidden");
     document.getElementById("welcome-message").classList.remove("hidden");
     changeBackgroundWithSlide(initialBackground);
 
